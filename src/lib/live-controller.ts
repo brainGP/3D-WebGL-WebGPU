@@ -58,7 +58,7 @@ export class LiveController {
   private visibility = () => {
     apis.forEach(api => {
       this.owned[api]?.meter.reset();
-      if (document.hidden && this.lanes[api].state === 'initializing') this.fail(api, new Error('Tab hidden during startup; restart for a valid comparison.'));
+      if (document.hidden && this.lanes[api].state === 'initializing') this.fail(api, new Error('Эхлэх үед хуудас далд болсон тул энэ хэмжилтийг ашиглахгүй. Дахин эхлүүлнэ үү.'));
     });
   };
   private clock = (now: number) => {
@@ -136,17 +136,17 @@ export class LiveController {
       this.phase(api, 'device');
       const deviceStart = performance.now();
       if (api === 'webgpu') {
-        if (!navigator.gpu) { this.fail(api, new Error('WebGPU is not exposed. Use HTTPS/localhost and a supported adapter/browser.'), true); return; }
+        if (!navigator.gpu) { this.fail(api, new Error('Браузер WebGPU-г дэмжихгүй эсвэл идэвхжүүлээгүй байна. HTTPS/localhost болон тохирох GPU, браузер шаардлагатай.'), true); return; }
         const impl = new gpuModule!.WebGPURenderer({ antialias: false, alpha: false, powerPreference: 'high-performance', trackTimestamp: true });
         renderer = impl;
         await impl.init();
         this.guard(run);
-        if (!(impl.backend as { isWebGPUBackend?: boolean }).isWebGPUBackend) throw new Error('Actual WebGPU backend unavailable; WebGL fallback refused.');
+        if (!(impl.backend as { isWebGPUBackend?: boolean }).isWebGPUBackend) throw new Error('Жинхэнэ WebGPU эхэлсэнгүй. Орлуулсан WebGL-ийг WebGPU гэж харуулахгүй.');
       } else {
         const impl = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' });
         renderer = impl;
         impl.debug.onShaderError = (gl, program, vertex, fragment) => {
-          throw new Error([gl.getProgramInfoLog(program), gl.getShaderInfoLog(vertex), gl.getShaderInfoLog(fragment)].filter(Boolean).join('\n') || 'GLSL compilation/link failed');
+          throw new Error([gl.getProgramInfoLog(program), gl.getShaderInfoLog(vertex), gl.getShaderInfoLog(fragment)].filter(Boolean).join('\n') || 'GLSL шэйдерийг хөрвүүлэх, холбоход алдаа гарлаа.');
         };
       }
       lane.metrics.deviceMs = performance.now() - deviceStart;
@@ -194,13 +194,13 @@ export class LiveController {
       this.phase(api, 'copy', true);
       this.observeNative(api, owned, run);
       if (api === 'webgl') {
-        const lost = (event: Event) => { event.preventDefault(); if (run === this.run) this.fail(api, new Error('WebGL context lost. Restart both.')); };
+        const lost = (event: Event) => { event.preventDefault(); if (run === this.run) this.fail(api, new Error('WebGL-ийн зурах орчин тасарлаа. Хоёуланг дахин эхлүүлнэ үү.')); };
         renderer.domElement.addEventListener('webglcontextlost', lost);
         owned.cleanups.push(() => renderer!.domElement.removeEventListener('webglcontextlost', lost));
       } else {
         const device = this.device(owned);
         if (device) {
-          void device.lost.then(info => { if (!this.disposed && run === this.run && info.reason !== 'destroyed') this.fail(api, new Error(`Device lost: ${info.message}`)); });
+          void device.lost.then(info => { if (!this.disposed && run === this.run && info.reason !== 'destroyed') this.fail(api, new Error(`GPU-тэй холболт тасарлаа: ${info.message}`)); });
           device.pushErrorScope('validation');
         }
       }
@@ -246,13 +246,13 @@ export class LiveController {
       }
       this.phase(api, 'completion', true, completedAt);
       this.phase(api, 'output', true, completedAt);
-      lane.state = 'complete'; lane.current = 'Frame available · GPU completion observed';
+      lane.state = 'complete'; lane.current = 'Эхний зураг бэлэн · GPU дууссан дохио ирсэн';
       lane.elapsedMs = lane.metrics.completionMs;
       this.counts(api, owned);
       // Native API tracing ends at startup to avoid adding per-draw hook overhead to FPS.
       owned.cleanups.splice(0, owned.cleanups.length).forEach(cleanup => cleanup());
       // Reinstall context-loss listener for sustained rendering.
-      const lost = (event: Event) => { event.preventDefault(); if (run === this.run) this.fail(api, new Error('WebGL context lost. Restart both.')); };
+      const lost = (event: Event) => { event.preventDefault(); if (run === this.run) this.fail(api, new Error('WebGL-ийн зурах орчин тасарлаа. Хоёуланг дахин эхлүүлнэ үү.')); };
       if (api === 'webgl') { renderer.domElement.addEventListener('webglcontextlost', lost); owned.cleanups.push(() => renderer!.domElement.removeEventListener('webglcontextlost', lost)); }
       if (api === 'webgpu') {
         const device = this.device(owned);
@@ -275,16 +275,16 @@ export class LiveController {
   private async complete(owned: Owned, api: LiveApi, run: number) {
     if (api === 'webgpu') {
       const device = this.device(owned);
-      if (!device) throw new Error('WebGPU queue completion not observable');
+      if (!device) throw new Error('WebGPU-ийн ажил дууссан дохиог авах боломжгүй.');
       let timeout: ReturnType<typeof setTimeout> | undefined;
       try {
-        await Promise.race([device.queue.onSubmittedWorkDone(), new Promise<never>((_, reject) => { timeout = setTimeout(() => reject(new Error('WebGPU completion timeout')), 30000); })]);
+        await Promise.race([device.queue.onSubmittedWorkDone(), new Promise<never>((_, reject) => { timeout = setTimeout(() => reject(new Error('WebGPU-ээс ажил дууссан дохио хугацаандаа ирсэнгүй.')), 30000); })]);
       } finally { clearTimeout(timeout); }
       this.guard(run); return;
     }
     const gl = (owned.renderer as THREE.WebGLRenderer).getContext() as WebGL2RenderingContext;
     const fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
-    if (!fence) throw new Error('WebGL completion fence unavailable');
+    if (!fence) throw new Error('WebGL-ийн ажил дууссаныг шалгах дохио үүссэнгүй.');
     gl.flush();
     let previous = performance.now();
     try {
@@ -292,9 +292,9 @@ export class LiveController {
         this.guard(run);
         if (this.lanes[api].state !== 'initializing') throw stale;
         const result = gl.clientWaitSync(fence, 0, 0);
-        if (result === gl.WAIT_FAILED) throw new Error('WebGL fence wait failed');
+        if (result === gl.WAIT_FAILED) throw new Error('WebGL-ийн ажил дууссаныг шалгахад алдаа гарлаа.');
         if (result === gl.ALREADY_SIGNALED || result === gl.CONDITION_SATISFIED) return;
-        if (performance.now() - this.epoch > 30000) throw new Error('GPU completion timeout');
+        if (performance.now() - this.epoch > 30000) throw new Error('GPU-ээс ажил дууссан дохио хугацаандаа ирсэнгүй.');
         await new Promise<void>(resolve => setTimeout(resolve, 0));
         const now = performance.now();
         this.lanes[api].detectorMs = Math.max(this.lanes[api].detectorMs, now - previous);
@@ -327,7 +327,7 @@ export class LiveController {
             if (!op) { op = { name, group, calls: 0, cpuMs: 0, firstMs: start - controller.epoch, lastMs: end - controller.epoch }; lane.operations.push(op); }
             op.calls++; op.cpuMs += ms; op.lastMs = end - controller.epoch;
             lane.metrics[category] = (lane.metrics[category] ?? 0) + ms;
-            lane.current = `${name} returned · CPU/API observation`;
+            lane.current = `${name} дуудлага буцлаа · CPU/API дээр ажиглав`;
             if (first) controller.emit(api);
           }
         }
@@ -411,7 +411,7 @@ export class LiveController {
       const stats = owned.meter.read();
       if (stats) { lane.metrics.fps = stats.fps; lane.metrics.frameMs = stats.frameMs; /* Startup submitMs is retained; rolling CPU is separate. */ lane.metrics.steadySubmitMs = stats.submitMs; }
       lane.metrics.medianMs = quantile(owned.intervals, .5); lane.metrics.p95Ms = quantile(owned.intervals, .95);
-      owned.meter.clearWindow(); lane.current = `Sustained rendering · ${lane.metrics.frames} measured frame intervals`; this.counts(api, owned); this.emit(api);
+      owned.meter.clearWindow(); lane.current = `Үргэлжлүүлэн зурж байна · ${lane.metrics.frames} кадрын хоорондох хугацааг хэмжив`; this.counts(api, owned); this.emit(api);
     } catch (error) { this.fail(api, error); }
   }
   private resize() {

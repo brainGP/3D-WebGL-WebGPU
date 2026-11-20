@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { newLane, completionComparison, quantile, launchBoth } from '../src/lib/live-lifecycle.ts';
+import { largestStartupGap } from '../src/lib/live-explanations.ts';
 import { FrameMeter } from '../src/lib/frame-meter.ts';
 import { makeGeometry, stageAt, rasterize, setCameraConvention, VERTEX_LEVELS, TOTAL_SECONDS } from '../src/lib/pipeline.ts';
 
@@ -185,4 +186,22 @@ test('canonical position/index data can be copied into independently mutable own
   assert.equal(gpu.attributes.position.getX(0), original);
   assert.equal(source.attributes.position.getX(0), original);
   source.dispose(); gl.dispose(); gpu.dispose();
+});
+
+test('startup explanation reflects either API being faster, without a preset cause', () => {
+  const gl = newLane('webgl', 1, 1000), gpu = newLane('webgpu', 1, 1000);
+  gl.state = gpu.state = 'complete';
+  gl.metrics.setupMs = 100; gpu.metrics.setupMs = 20;
+  gl.metrics.deviceMs = 4; gpu.metrics.deviceMs = 10;
+  assert.equal(largestStartupGap(gl, gpu).gapMs, -80);
+  gpu.metrics.setupMs = 200;
+  assert.equal(largestStartupGap(gl, gpu).gapMs, 100);
+});
+test('startup explanation cannot infer a gap from failed, missing or stale measurements', () => {
+  const gl = newLane('webgl', 1, 1000), gpu = newLane('webgpu', 1, 1000);
+  gl.state = gpu.state = 'complete';
+  assert.equal(largestStartupGap(gl, gpu), null);
+  gl.metrics.deviceMs = 10; gpu.metrics.deviceMs = 20;
+  gpu.state = 'unsupported'; assert.equal(largestStartupGap(gl, gpu), null);
+  gpu.state = 'complete'; gpu.run = 2; assert.equal(largestStartupGap(gl, gpu), null);
 });

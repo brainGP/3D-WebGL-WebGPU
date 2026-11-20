@@ -15,17 +15,17 @@ export interface LiveLane {
   metrics: LiveStats; error?: string; detectorMs: number;
 }
 export const PHASES: ReadonlyArray<{ id: string; label: string; group: WorkGroup }> = [
-  { id: 'geometry', label: 'Canonical geometry preparation', group: 'cpu' },
-  { id: 'module', label: 'Renderer module ready', group: 'cpu' },
-  { id: 'device', label: 'Context / device initialization', group: 'api' },
-  { id: 'copy', label: 'Owned scene and buffer-data copy', group: 'cpu' },
-  { id: 'setup', label: 'Shader / pipeline readiness', group: 'api' },
-  { id: 'submit', label: 'First frame encoded / submitted', group: 'api' },
-  { id: 'completion', label: 'GPU completion signal observed', group: 'gpu' },
-  { id: 'output', label: 'Rendered frame available', group: 'output' },
+  { id: 'geometry', label: 'Объектын цэгүүдийг бэлдэх', group: 'cpu' },
+  { id: 'module', label: 'Зураг зурах код бэлэн болох', group: 'cpu' },
+  { id: 'device', label: 'GPU-тэй ажиллах орчин бэлдэх', group: 'api' },
+  { id: 'copy', label: 'Өөрийн өгөгдлийн хувийг бэлдэх', group: 'cpu' },
+  { id: 'setup', label: 'Шэйдер ба зурах тохиргоо бэлдэх', group: 'api' },
+  { id: 'submit', label: 'Эхний зургийг зурах команд өгөх', group: 'api' },
+  { id: 'completion', label: 'GPU ажил дууссан дохиог авах', group: 'gpu' },
+  { id: 'output', label: 'Эхний зураг бэлэн', group: 'output' },
 ];
 export function newLane(api: LiveApi, run = 0, commonStart = 0): LiveLane {
-  return { api, run, commonStart, state: 'idle', elapsedMs: 0, current: 'Ready to start', detectorMs: 0,
+  return { api, run, commonStart, state: 'idle', elapsedMs: 0, current: 'Эхлүүлэхэд бэлэн', detectorMs: 0,
     milestones: PHASES.map(p => ({ ...p, state: 'pending' })), operations: [],
     metrics: { initializationMs: null, firstGpuMs: null, geometryMs: null, copyMs: null, moduleMs: null, deviceMs: null, setupMs: null, uploadMs: null, shaderApiMs: null, encodingMs: null, commandMs: null, steadySubmitMs: null, submitMs: null, gpuMs: null, completionMs: null, waitMs: null, fps: null, frameMs: null, medianMs: null, p95Ms: null, frames: 0, calls: null, triangles: null, vertices: 0, indices: 0, resolution: '' } };
 }

@@ -47,7 +47,7 @@ The table separates CPU preparation, API call durations, initialization, first-f
 **Educational pipeline** preserves the prior 36-second slow-motion controls, mesh representations, Mongolian explanations, pixel lab and isolated/concurrent complexity benchmarks. That engine does not run alongside live comparison. The original cube benchmark, saved history and CSV export remain in **Нэмэлт хэмжилт**.
 
 ```sh
-npm test                     # 25 core measurement/geometry/coordination tests
+npm test                     # 27 core measurement/geometry/coordination tests
 npm run typecheck
 npm run build
 npx playwright install chromium
@@ -56,3 +56,18 @@ npm run test:browser          # Actual-page browser checks; port 5178
 
 Use Node 22.6+ for core tests. Browser tests were blocked by local-server `EPERM` in the implementation environment. No actual hardware completion times or winner have been obtained here. See [IMPLEMENTATION_REPORT.md](IMPLEMENTATION_REPORT.md) for exact boundaries, fairness limits, architecture and validation status.
 # 3D-WebGL-WebGPU
+
+## Монгол тайлбар
+
+Үндсэн дэлгэцийн товч, явц, хүснэгтүүд монгол тайлбартай. CPU, GPU, API, буфер, шэйдер, FPS, медиан, p95 зэрэг үгийг **Нэр томьёог энгийнээр** хэсгээс харна. Бодитоор ажигласан API функц бүрийн нэрийн дор хийх ажлыг нь товч тайлбарласан.
+
+Объект зураг болох зургаан алхмыг энгийнээр тайлбарлав:
+
+1. Цэгүүдийг бэлдэх.
+2. Цэгүүдийн байрлалыг тооцох.
+3. Цэгүүдийг гурвалжин болгох.
+4. Гурвалжинг дэлгэцийн жижиг нүднүүдэд хуваах.
+5. Өнгө ба гэрэл тооцох.
+6. Бэлэн зургийг хадгалах.
+
+**WebGPU яагаад эхлэхдээ удаан байж болох вэ?** хэсэг нь нэг удаагийн эхлэлийн бэлтгэлийг дараагийн зуралтын хугацаанаас ялгаж харуулна. Хэмжилт хийсний дараа сонгосон бэлтгэлийн хэсгүүдээс хамгийн их зөрсөн хэсгийг бодит тоогоор үзүүлнэ. Энэ нь ажигласан зөрүү болохоос дотоод шалтгааны баталгаа биш. WebGPU үргэлж хурдан гэж үзэхгүй; WebGL хурдан гарсан үр дүнг мөн хэвээр харуулна.

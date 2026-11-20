@@ -82,7 +82,7 @@ For positive totals `fast` and `slow`, difference = `slow - fast`, percentage le
 
 - TypeScript: PASS.
 - Production build: PASS (existing Three.js chunk-size/dependency directive warnings remain).
-- Unit/math suite: **25 tests pass**. Includes canonical copy independence, both tasks launching before either settles, failure isolation, winner symmetry, tolerance/notification handling, median/p95, frame meters, 500K indices and educational math.
+- Unit/math suite: **27 tests pass**. Includes canonical copy independence, both tasks launching before either settles, failure isolation, winner symmetry, tolerance/notification handling, median/p95, frame meters, 500K indices and educational math.
 - `npm run test:browser`: **BLOCKED before browser launch** — local server failed with `listen EPERM: operation not permitted 127.0.0.1:5178`.
 - Actual rendering, first-frame signals, GPU query values, event-hook coverage, responsive appearance and driver resource behavior: **NOT VERIFIED here**.
 - Actual hardware benchmark numbers / winner: **none obtained; none invented**.
@@ -101,3 +101,13 @@ npm run test:browser
 ```
 
 `CHROME_PATH` can select an installed Chromium. Browser checks use port 5178 and ignored `test-results/` / `playwright-report/` artifacts. WebGL needs WebGL 2; WebGPU needs a secure context, exposed API and successful actual backend initialization. A Three.js WebGL fallback is rejected rather than mislabeled. GPU timer support is checked separately.
+
+## Монгол хэл ба энгийн тайлбарын шинэчлэлт
+
+Үндсэн харьцуулалтын товч, төлөв, найман бодит алхам, хэмжилтийн хүснэгт, алдааны тайлбар болон объект/материалын үндсэн удирдлагыг монголчилсон. API функцүүдийн техникийн нэрийг хэвээр үлдээж, тэдгээрийн юу хийдгийг нэг өгүүлбэрээр тайлбарласан. CPU, GPU, API, шэйдер, буфер, FPS, медиан, p95 зэрэг үгсийн тайлбар нэмсэн.
+
+Сургалтын зургаан алхам энгийн нэр, оролт/гаралтын үгэн тайлбар, CPU / WebGL / WebGPU / GPU-ийн хийх ажлын товч тайлбартай болсон. Нарийн томъёо, нэмэлт техникийн тайлбарууд хадгалагдсан.
+
+WebGPU-ийн эхлэлийн нэмэлт ажил, дараагийн зуралтын давтан ашиглах бэлтгэлийг ялгасан тайлбар нэмсэн. Эхлэх үеийн хамгийн их ажиглагдсан зөрүүг зөвхөн дууссан, ижил эхлэл/дугаартай хоёр хэмжилтээс гаргана. Дэмжигдээгүй, дутуу эсвэл хуучин хэмжилтээс тайлбар зохиохгүй. Хэмжсэн зөрүүг дотоод шалтгаан эсвэл WebGPU-ийн байнгын давуу тал гэж үзэхгүй.
+
+Энэ өөрчлөлтийн дараах үндсэн тест: 27. Браузерийн тестийн харагдах текстийн сонголтуудыг монгол интерфэйст тохируулсан. Өмнөх браузер/GPU баталгаажуулалтын хязгаар хэвээр: EPERM орчноос болж бодит дүрслэл ба төхөөрөмжийн тоонууд баталгаажаагүй.

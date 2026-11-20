@@ -216,3 +216,23 @@
 @media (max-width: 1100px) { .live-lane { padding: 14px; } .live-lane header { flex-direction: column; align-items: flex-start; gap: 3px; } }
 @media (max-width: 480px) { .live-lanes { grid-template-columns: 1fr; } .live-lane + .live-lane { border-left: 0; border-top: 1px solid #26344a; } .live-verdict > strong { font-size: 19px; } .live-verdict { padding: 15px; } .live-start-controls label { flex-wrap: wrap; } .live-start-controls select { max-width: 245px; } }
 @media (prefers-reduced-motion: reduce) { .live-lane li[data-state=active] > i { animation: none; } }
+.live-startup-explanation { margin: 28px 0 12px; padding: 22px 0; border-top: 1px solid #2b3b54; border-bottom: 1px solid #2b3b54; }
+.live-startup-explanation h2 { margin-bottom: 12px; color: #c8d9f1; font-size: 21px; font-weight: 500; }
+.live-startup-explanation p, .live-startup-explanation li { color: #93a9c8; font-size: 14px; line-height: 1.85; }
+.live-startup-explanation strong, .live-startup-explanation b { color: #bdcfe9; font-weight: 550; }
+.live-startup-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 20px; }
+.live-startup-columns article { padding-left: 15px; border-left: 2px solid #6e92cd; }
+.live-startup-columns article + article { border-color: #a28ce0; }
+.live-startup-columns h3 { margin-bottom: 7px; color: #bccfe9; font-size: 15px; font-weight: 500; }
+.live-startup-columns dl { display: flex; gap: 28px; margin-top: 10px; }
+.live-startup-columns dt { color: #7e97b9; font-size: 12px; }
+.live-startup-columns dd { margin: 2px 0 0; color: #c9dcfb; font-size: 18px; font-variant-numeric: tabular-nums; }
+.live-startup-reading { margin-top: 20px; }
+.live-startup-explanation ul { display: grid; gap: 10px; margin: 15px 0; padding-left: 20px; }
+.live-startup-explanation details p { margin-top: 10px; }
+.live-startup-explanation a { color: #a7c5f5; }
+.live-glossary { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 30px; margin-top: 20px; }
+.live-glossary dt { margin-bottom: 5px; color: #b5cce9; font-size: 14px; }
+.live-glossary dd { margin: 0; color: #8da4c5; font-size: 14px; line-height: 1.8; }
+.live-native-log p { margin: 4px 0; color: #a1b4ce; font-size: 13px; line-height: 1.7; }
+@media (max-width: 760px) { .live-startup-columns, .live-glossary { grid-template-columns: 1fr; gap: 20px; } .live-startup-explanation h2 { font-size: 19px; } }

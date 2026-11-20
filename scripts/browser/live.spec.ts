@@ -4,9 +4,9 @@ test('actual page: shared start, independent lifecycle, owned canvases, completi
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await expect(page.getByRole('button', { name: 'Start both', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Хоёуланг эхлүүлэх', exact: true })).toBeVisible();
   await expect(page.locator('.live-comparison canvas')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Start both', exact: true }).click();
+  await page.getByRole('button', { name: 'Хоёуланг эхлүүлэх', exact: true }).click();
   const gl = page.getByTestId('lane-webgl'), gpu = page.getByTestId('lane-webgpu');
   await expect(gl).toHaveAttribute('data-state', /complete|error|unsupported/, { timeout: 45000 });
   await expect(gpu).toHaveAttribute('data-state', /complete|error|unsupported/, { timeout: 45000 });
@@ -16,17 +16,17 @@ test('actual page: shared start, independent lifecycle, owned canvases, completi
   await expect(page.locator('canvas[aria-label="webgl live output"]')).toHaveCount(1);
   if (await gpu.getAttribute('data-state') === 'complete') {
     await expect(page.locator('canvas[aria-label="webgpu live output"]')).toHaveCount(1);
-    await expect(page.getByTestId('completion-verdict')).toContainText(/finished first|Comparable/);
-    await expect(page.getByTestId('completion-verdict')).toContainText('completion-time ratio');
-    const vertices = page.locator('.live-comparison table tr').filter({ has: page.locator('td', { hasText: /^vertices$/ }) });
+    await expect(page.getByTestId('completion-verdict')).toContainText(/түрүүлж зураг бэлдлээ|ойролцоо/);
+    await expect(page.getByTestId('completion-verdict')).toContainText('хугацааны харьцаа');
+    const vertices = page.locator('.live-comparison table tr').filter({ has: page.locator('td', { hasText: /^Оройн цэгийн тоо$/ }) });
     const values = await vertices.locator('td').allTextContents(); expect(values[1]).toBe(values[2]);
-    const indices = await page.locator('.live-comparison table tr').filter({ has: page.locator('td', { hasText: /^indices$/ }) }).locator('td').allTextContents();
+    const indices = await page.locator('.live-comparison table tr').filter({ has: page.locator('td', { hasText: /^Цэг холбох индексийн тоо$/ }) }).locator('td').allTextContents();
     expect(indices[1]).toBe(indices[2]);
-  } else await expect(page.getByTestId('completion-verdict')).toContainText('No valid');
+  } else await expect(page.getByTestId('completion-verdict')).toContainText('бүрэн харьцуулах боломжгүй');
   await expect(gl.locator('li[data-state="done"]')).toHaveCount(8);
   await expect(gl.locator('.live-native-log')).toContainText('drawElements');
   // Independently collected sustained cadence appears only after warm-up.
-  await expect.poll(async () => Number((await page.locator('.live-comparison table tr').filter({ hasText: 'Steady FPS' }).locator('td').nth(1).textContent())?.replaceAll(',', '')), { timeout: 10000 }).toBeGreaterThan(0);
+  await expect.poll(async () => Number((await page.locator('.live-comparison table tr').filter({ hasText: 'Секундэд зурсан кадрын тоо' }).locator('td').nth(1).textContent())?.replaceAll(',', '')), { timeout: 10000 }).toBeGreaterThan(0);
   const canvas = page.locator('canvas[aria-label="webgl live output"]');
   const screenshot = await canvas.screenshot();
   const lit = await page.evaluate(async base64 => {
@@ -37,11 +37,11 @@ test('actual page: shared start, independent lifecycle, owned canvases, completi
     let colored = 0; for (let i = 0; i < pixels.length; i += 4) if (pixels[i + 2] > 65) colored++; return colored;
   }, screenshot.toString('base64'));
   expect(lit).toBeGreaterThan(100);
-  await page.getByRole('button', { name: 'Freeze event view', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Resume event view' })).toBeVisible();
-  await page.getByRole('button', { name: 'Resume event view' }).click();
+  await page.getByRole('button', { name: 'Явцын харагдацыг түр царцаах', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Явцыг дахин харуулах' })).toBeVisible();
+  await page.getByRole('button', { name: 'Явцыг дахин харуулах' }).click();
   const oldRun = await gl.getAttribute('data-run');
-  await page.getByRole('button', { name: 'Restart both', exact: true }).click();
+  await page.getByRole('button', { name: 'Хоёуланг дахин эхлүүлэх', exact: true }).click();
   await expect(gl).not.toHaveAttribute('data-run', oldRun!);
   await expect(gl).toHaveAttribute('data-state', /complete|error/, { timeout: 45000 });
   await expect(page.locator('canvas[aria-label="webgl live output"]')).toHaveCount(1);
@@ -55,24 +55,24 @@ test('actual page: shared start, independent lifecycle, owned canvases, completi
 test('unsupported WebGPU never delays or fakes WebGL completion', async ({ page }) => {
   await page.addInitScript(() => Object.defineProperty(navigator, 'gpu', { get: () => undefined }));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Start both', exact: true }).click();
+  await page.getByRole('button', { name: 'Хоёуланг эхлүүлэх', exact: true }).click();
   await expect(page.getByTestId('lane-webgpu')).toHaveAttribute('data-state', 'unsupported');
   await expect(page.getByTestId('lane-webgl')).toHaveAttribute('data-state', 'complete', { timeout: 30000 });
   await expect(page.locator('canvas[aria-label="webgpu live output"]')).toHaveCount(0);
-  await expect(page.getByTestId('completion-verdict')).toContainText('No valid');
+  await expect(page.getByTestId('completion-verdict')).toContainText('бүрэн харьцуулах боломжгүй');
 });
 
 test('rapid restart and mode unmount do not leave duplicate render canvases', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Start both', exact: true }).click();
-  await page.getByRole('button', { name: 'Restart both', exact: true }).click();
-  await page.getByRole('button', { name: 'Restart both', exact: true }).click();
+  await page.getByRole('button', { name: 'Хоёуланг эхлүүлэх', exact: true }).click();
+  await page.getByRole('button', { name: 'Хоёуланг дахин эхлүүлэх', exact: true }).click();
+  await page.getByRole('button', { name: 'Хоёуланг дахин эхлүүлэх', exact: true }).click();
   await expect(page.getByTestId('lane-webgl')).toHaveAttribute('data-state', 'complete', { timeout: 45000 });
   await expect(page.locator('canvas[aria-label="webgl live output"]')).toHaveCount(1);
-  await page.getByRole('button', { name: 'Educational pipeline', exact: true }).click();
+  await page.getByRole('button', { name: '6 алхмын тайлбар', exact: true }).click();
   await expect(page.locator('canvas[aria-label="webgl live output"]')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Live comparison', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Start both', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Бодит харьцуулалт', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Хоёуланг эхлүүлэх', exact: true })).toBeVisible();
   await expect(page.locator('.live-comparison canvas')).toHaveCount(0);
 });
 
@@ -86,16 +86,16 @@ test('missing GL hardware timing stays unavailable while CPU rendering completes
     };
   });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Start both', exact: true }).click();
+  await page.getByRole('button', { name: 'Хоёуланг эхлүүлэх', exact: true }).click();
   await expect(page.getByTestId('lane-webgl')).toHaveAttribute('data-state', 'complete', { timeout: 30000 });
-  await expect(page.locator('.live-comparison table tr').filter({ hasText: 'First-frame GPU draw pass' }).locator('td').nth(1)).toHaveText('Not available');
+  await expect(page.locator('.live-comparison table tr').filter({ hasText: 'Эхний зургийн GPU тооцоолол' }).locator('td').nth(1)).toHaveText('Хэмжих боломжгүй');
 });
 
 test('a WebGL shader-creation failure is isolated from the other lane', async ({ page }) => {
   await page.addInitScript(() => { WebGL2RenderingContext.prototype.createShader = () => { throw new Error('Injected shader failure'); }; });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Start both', exact: true }).click();
+  await page.getByRole('button', { name: 'Хоёуланг эхлүүлэх', exact: true }).click();
   await expect(page.getByTestId('lane-webgl')).toHaveAttribute('data-state', 'error');
   await expect(page.getByTestId('lane-webgpu')).toHaveAttribute('data-state', /complete|unsupported|error/, { timeout: 45000 });
-  await expect(page.getByTestId('completion-verdict')).toContainText('No valid');
+  await expect(page.getByTestId('completion-verdict')).toContainText('бүрэн харьцуулах боломжгүй');
 });
